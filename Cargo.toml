@@ -1,0 +1,7 @@
+[package]
+name = "flow"
+version = "0.2.0"
+edition = "2021"
+description = "The Flow programming language — enhanced with REPL, modules, string interpolation, and more."
+
+[dependencies]

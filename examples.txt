@@ -1,0 +1,532 @@
+Example 1:
+Input:
+~~~ Block scoping demo ~~~
+~~~ Variables from an outer scope can be changed inside a block... ~~~
+>> total = 0;
+again 5 {
+    total = total + 1;
+}
+"total:" << show: Add.space << total << show;
+
+~~ ...but a variable CREATED inside a block only lives in that block. ~~
+>> i = 0;
+>> sum = 0;
+aslong i < 5 {
+    >> doubled = i * 2;  ~~ 'doubled' only exists for this pass ~~
+    sum = sum + doubled;
+    i = i + 1;
+}
+"sum of doubles:" << show: Add.space << sum << show;
+
+
+Output:
+total: 5
+sum of doubles: 20
+
+
+Example 2:
+Input:
+~~ String indexing: reuses the same 'index' word arrays already use ~~
+>> word = "Flow";
+word index 0 << show;
+word index 3 << show;
+
+~~ Chained dot access on nested maps ~~
+>> game = map {
+    player: map {
+        name: "Freddy",
+        level: 12
+    }
+};
+game.player.name << show;
+game.player.level << show;
+
+~~ roll() for a random decimal 0-1, roll(low, high) for a random whole number ~~
+>> d6 = roll(1, 6);
+"you rolled:" << show: Add.space << d6 << show;
+
+~~ Note that this is singular comment
+
+~~~Note that this is multiple lines
+1
+2
+3
+~~~
+
+
+Output:
+F
+w
+Freddy
+12
+you rolled: 2
+
+
+
+Example 3:
+Input:
+>> i = 1;
+aslong i <= 20 {
+    check i % 15 == 0 then {
+        "FizzBuzz" << show;
+    } else {
+        check i % 3 == 0 then {
+            "Fizz" << show;
+        } else {
+            check i % 5 == 0 then {
+                "Buzz" << show;
+            } else {
+                i << show;
+            }
+        }
+    }
+    i = i + 1;
+}
+
+
+Output:
+1
+2
+Fizz
+4
+Buzz
+Fizz
+7
+8
+Fizz
+Buzz
+11
+Fizz
+13
+14
+FizzBuzz
+16
+17
+Fizz
+19
+Buzz
+
+
+Example 4:
+Input:
+>> greeting = "Hello, ";
+>> who = "World";
+greeting + who << show;
+
+Output:
+Hello, World
+
+
+Example 5:
+~~ repeat exactly N times ~~
+again 5 {
+    "hello" << show;
+}
+
+~~ while-style loop ~~
+>> i = 0;
+aslong i < 3 {
+    i << show;
+    i = i + 1;
+}
+
+~~ infinite loop with break ~~
+>> counter = 0;
+loop {
+    counter << show;
+    counter = counter + 1;
+    check counter == 3 then break;
+}
+
+
+Output:
+hello
+hello
+hello
+hello
+hello
+0
+1
+2
+0
+1
+2
+
+
+
+Example 6:
+Input:
+~~ Binary Search Tree in Flow ~~
+~~ Demonstrates recursion, maps, arrays, loops, and immutability ~~
+
+~~ Sentinel for an empty tree ~~
+>> empty = "empty";
+
+~~ Insert a value into a BST (returns a new tree) ~~
+put insert(t, v) {
+    check t == empty then {
+        take map { val: v, left: empty, right: empty };
+    } else {
+        check v < t.val then {
+            take map { val: t.val, left: insert(t.left, v), right: t.right };
+        } else {
+            take map { val: t.val, left: t.left, right: insert(t.right, v) };
+        }
+    }
+}
+
+~~ In‑order traversal: prints values in sorted order ~~
+put inorder(t) {
+    check t != empty then {
+        inorder(t.left);
+        t.val << show: Add.space;
+        inorder(t.right);
+    }
+}
+
+~~ ---- Main program ---- ~~
+>> values = box [5, 3, 7, 2, 4, 6, 8];   ~~ our unsorted numbers
+>> tree = empty;
+>> i = 0;
+
+~~ Build the tree by inserting each element ~~
+aslong i < 7 {
+    tree = insert(tree, values index i);
+    i = i + 1;
+}
+
+~~ Print the sorted tree ~~
+"Sorted values: " << show: Add.space;
+inorder(tree);
+"" << show;   ~~ final newline
+
+
+
+Output:
+Sorted values:  2 3 4 5 6 7 8
+
+
+Example 7:
+Input:
+>> score = 100;
+check score >= 90 then {
+    "A grade" << show;
+} else {
+    "Not an A" << show;
+}
+
+~~ single-statement form ~~
+check score > 50 then "Passing" << show;
+
+Output:
+A grade
+Passing
+
+
+
+Example 8:
+Input:
+~~~ Module showcase — demonstrates all built-in Flow modules ~~~
+
+~~ ── vault module ───────────────────────────────────────────── ~~
+
+use vault;
+
+vault.inscribe("demo.txt", "Line one\n");
+
+vault.stack("demo.txt", "Line two\n");
+
+vault.stack("demo.txt", "Line three\n");
+
+>> contents = vault.fetch("demo.txt");
+
+"File contents:" << show;
+
+contents << show;
+
+check vault.exists("demo.txt") then {
+
+    "File exists: true" << show;
+
+}
+
+vault.scratch("demo.txt");
+
+check vault.exists("demo.txt") then {
+
+    "still there?" << show;
+
+} else {
+
+    "File removed cleanly." << show;
+
+}
+
+~~ ── cargo module ───────────────────────────────────────────── ~~
+
+use cargo;
+
+>> scores = box [42, 7, 99, 13, 55];
+
+"Scores: " + scores << show;
+
+"Count  : " + cargo.tally(scores) << show;
+
+"Sorted : " + cargo.align(scores) << show;
+
+"Flipped: " + cargo.flip(scores) << show;
+
+"Last   : " + cargo.peek(scores) << show;
+
+cargo.shove(scores, 100);
+
+"After shove: " + scores << show;
+
+>> popped = cargo.pluck(scores);
+
+"Plucked " + popped + ", box is now: " + scores << show;
+
+~~ ── reckon module ──────────────────────────────────────────── ~~
+
+use reckon;
+
+"Peak of 10 and 3 : " + reckon.peak(10, 3) << show;
+
+"Pit  of 10 and 3 : " + reckon.pit(10, 3) << show;
+
+"Flatten of 4.8   : " + reckon.flatten(4.8) << show;
+
+"Raise   of 4.1   : " + reckon.raise(4.1) << show;
+
+"Boost 2^8        : " + reckon.boost(2, 8) << show;
+
+"Root of 144      : " + reckon.root(144) << show;
+
+"Drift of -17     : " + reckon.drift(-17) << show;
+
+~~ ── pulse module ───────────────────────────────────────────── ~~
+
+use pulse;
+
+>> t1 = pulse.beat();
+
+"Start timestamp (ms): " + t1 << show;
+
+pulse.stall(100);
+
+>> t2 = pulse.beat();
+
+"After 100ms stall  : " + t2 << show;
+
+"Elapsed (ms)        : " + (t2 - t1) << show;
+
+~~ ── prose module ───────────────────────────────────────────── ~~
+
+use prose;
+
+>> raw = "   Hello, Flow Language!   ";
+
+"Shaved : '" + prose.shave(raw) + "'" << show;
+
+"Shout  : " + prose.shout(prose.shave(raw)) << show;
+
+"Whisper: " + prose.whisper(prose.shave(raw)) << show;
+
+"Holds 'Flow': " + prose.holds(raw, "Flow") << show;
+
+>> words = prose.cleave("one,two,three", ",");
+
+words << show;
+
+"Stitched: " + prose.stitch(words, " - ") << show;
+
+"Swapped: " + prose.swap("abc-def-ghi", "-", "/") << show;
+
+"Glyph 7: " + prose.glyph("Hello!", 1) << show;
+
+~~ ── echo module ────────────────────────────────────────────── ~~
+
+use echo;
+
+~~ Use \{ to escape braces so they are not treated as interpolation ~~
+
+>> tmpl = "Hello, \{name}! You have \{count} messages.";
+
+>> filled = echo.stamp(tmpl, map { name: "Alice", count: 5 });
+
+filled << show;
+
+"Padded  : '" + echo.pad("hi", 10) + "'" << show;
+
+"Centered: '" + echo.center("hi", 10, "-") + "'" << show;
+
+"Repeated: " + echo.repeat("ha", 4) << show;
+
+
+
+
+
+
+
+
+
+Output:
+
+File contents:
+
+Line one
+
+Line two
+
+Line three
+
+File exists: true
+
+File removed cleanly.
+
+Scores: [42, 7, 99, 13, 55]
+
+Count  : 5
+
+Sorted : [7, 13, 42, 55, 99]
+
+Flipped: [55, 13, 99, 7, 42]
+
+Last   : 55
+
+After shove: [42, 7, 99, 13, 55, 100]
+
+Plucked 100, box is now: [42, 7, 99, 13, 55]
+
+Peak of 10 and 3 : 10
+
+Pit  of 10 and 3 : 3
+
+Flatten of 4.8   : 4
+
+Raise   of 4.1   : 5
+
+Boost 2^8        : 256
+
+Root of 144      : 12
+
+Drift of -17     : 17
+
+Start timestamp (ms): 1784946591567
+
+After 100ms stall  : 1784946591668
+
+Elapsed (ms)        : 101
+
+Shaved : 'Hello, Flow Language!'
+
+Shout  : HELLO, FLOW LANGUAGE!
+
+Whisper: hello, flow language!
+
+Holds 'Flow': true
+
+["one", "two", "three"]
+
+Stitched: one - two - three
+
+Swapped: abc/def/ghi
+
+Glyph 7: 
+
+Hello, Alice! You have 5 messages.
+
+Padded  : 'hi        '
+
+Centered: '----hi----'
+
+Repeated: hahahaha
+
+
+Example 9:
+Input:
+~~~ argv and prove demo ~~~
+
+~~ argv is a box of strings: argv[0] = script name, rest = user args ~~
+"Script name: " + argv index 0 << show;
+
+>> arg_count = length(argv) - 1;
+"Arguments  : {arg_count}" << show;
+
+check arg_count > 0 then {
+    "First arg  : " + argv index 1 << show;
+}
+
+~~ prove(condition) — assertion; proves must hold or the program stops ~~
+prove(1 + 1 == 2);
+prove(true, "true must be truthy");
+
+>> x = 42;
+prove(x > 0, "x should be positive");
+
+"All assertions passed." << show;
+
+~~ Failing assertion example (commented out) ~~
+~~ prove(false, "This would crash with: This would crash with...") ~~
+
+~~ exit(code) — exits with the given status code ~~
+~~ exit(0);   ~~
+
+
+Output:
+Script name: examples\argv_prove.flow
+Arguments  : 0
+All assertions passed.
+
+
+
+Example 10:
+Input:
+~~~ weave — higher-order collection helpers ~~~
+
+use weave;
+
+>> numbers = box [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+~~ gather = map: transform each element ~~
+put double(x) { take x * 2; }
+>> doubled = weave.gather(numbers, double);
+"Doubled: " + doubled << show;
+
+~~ sift = filter: keep elements where the function returns true ~~
+put is_even(x) { take x % 2 == 0; }
+>> evens = weave.sift(numbers, is_even);
+"Evens  : " + evens << show;
+
+~~ fold = reduce: accumulate into a single value ~~
+put add(acc, x) { take acc + x; }
+>> total = weave.fold(numbers, 0, add);
+"Sum    : " + total << show;
+
+~~ Chain: sum of squares of even numbers ~~
+put square(x) { take x * x; }
+>> result = weave.fold(weave.gather(weave.sift(numbers, is_even), square), 0, add);
+"Sum of squares of evens: " + result << show;
+
+~~ each_with: iterate with index ~~
+>> fruits = box ["apple", "banana", "cherry"];
+put print_item(i, item) {
+    "{i}: {item}" << show;
+}
+weave.each_with(fruits, print_item);
+
+~~ Global shortcuts (no module prefix needed) ~~
+put is_odd(x) { take x % 2 != 0; }
+>> odds = sift(numbers, is_odd);
+"Odds (global sift): " + odds << show;
+
+
+output:
+Doubled: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+Evens  : [2, 4, 6, 8, 10]
+Sum    : 55
+Sum of squares of evens: 220
+0: apple
+1: banana
+2: cherry
+Odds (global sift): [1, 3, 5, 7, 9]
